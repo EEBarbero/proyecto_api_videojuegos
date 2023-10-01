@@ -26,9 +26,9 @@ warnings.warn('Do not show this message')
 app = FastAPI()
 
 # Cargo los archivos de datos
-df_reviews = pd.DataFrame(pd.read_csv(r"data/aur_api.csv"))
-df_users = pd.DataFrame(pd.read_csv(r"data/aui_api.csv"))
-df_items = pd.DataFrame(pd.read_csv(r"data/osg_api.csv"))
+df_reviews = pd.DataFrame(pd.read_csv(r"aur_api.csv"))
+df_users = pd.DataFrame(pd.read_csv(r"aui_api.csv"))
+df_items = pd.DataFrame(pd.read_csv(r"osg_api.csv"))
 
 # Hago los merge para que trabajen las funciones
 df_UsersItems = (pd.merge(df_users, df_items, left_on="item_id",right_on="item_id")[["user_id","genres","anio_lanzamiento","playtime_forever"]])
