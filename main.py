@@ -29,9 +29,9 @@ df_users = pd.DataFrame(pd.read_csv(r"data/aui_api.csv"))
 df_items = pd.DataFrame(pd.read_csv(r"data/osg_api.csv"))
 
 # Cargo los archivos que se usaran en el modelo de recomendación item-item (ML)
-#df_BD = pd.DataFrame(pd.read_csv(r"data/osg_mr.csv")) # Dataframe
-similitud_del_coseno = np.loadtxt(r"data/osg_mr_sim_cos.txt") # Matriz de similitud del coseno
-indice = pd.DataFrame(pd.read_csv(r"data/osg_mr_indice.csv")) # Índice de acceso a la matriz
+df_BD = pd.DataFrame(pd.read_csv(r"data/redu_osg_mr.csv")) # Dataframe
+similitud_del_coseno = np.loadtxt(r"ata/redu_osg_mr_sim_cos.txt") # Matriz de similitud del coseno
+indice = pd.DataFrame(pd.read_csv(r"data/redu_osg_mr_indice.csv")) # Índice de acceso a la matriz
 
 # Hago los merge para que trabajen las funciones
 df_UsersItems = (pd.merge(df_users, df_items, left_on="item_id",right_on="item_id")[["user_id","genres","anio_lanzamiento","playtime_forever"]])
