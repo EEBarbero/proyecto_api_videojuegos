@@ -18,9 +18,7 @@ import pandas as pd
 import warnings
 
 # Desactivación de warnings
-warnings.filterwarnings('ignore')
-warnings.warn('DelftStack')
-warnings.warn('Do not show this message')
+warnings.filterwarnings("ignore")
 
 # Instancio FastApi
 app = FastAPI()
@@ -29,6 +27,11 @@ app = FastAPI()
 df_reviews = pd.DataFrame(pd.read_csv(r"data/aur_api.csv"))
 df_users = pd.DataFrame(pd.read_csv(r"data/aui_api.csv"))
 df_items = pd.DataFrame(pd.read_csv(r"data/osg_api.csv"))
+
+# Cargo los archivos que se usaran en el modelo de recomendación item-item (ML)
+#df_BD = pd.DataFrame(pd.read_csv(r"data/osg_mr.csv")) # Dataframe
+similitud_del_coseno = np.loadtxt(r"data/osg_mr_sim_cos.txt") # Matriz de similitud del coseno
+indice = pd.DataFrame(pd.read_csv(r"data/osg_mr_indice.csv")) # Índice de acceso a la matriz
 
 # Hago los merge para que trabajen las funciones
 df_UsersItems = (pd.merge(df_users, df_items, left_on="item_id",right_on="item_id")[["user_id","genres","anio_lanzamiento","playtime_forever"]])
@@ -131,4 +134,25 @@ def sentiment_analysis(anio: int):
         neutros = resultado.loc[1]["item_id"] if 1 in resultado.index else 0
         positivos = resultado.loc[2]["item_id"] if 2 in resultado.index else 0
         retorno = {f"Clasificación de comentarios para los juegos lanzados en el año {anio}":f"Negativos: {negativos}, Neutrales: {neutros}, Positivos: {positivos}"}        
+    return retorno
+
+@app.get("/recomendacion_juegos/{item_id}")
+def obtener_recomendaciones(item_id: int):
+
+    idx = indice[indice["item_id"] == item_id]["0"].values[0]
+    if idx.empty:
+        retorno = {"Error":f"No se dispone de datos para el Año {anio}."}
+    else:
+        puntajes_similares = list(enumerate(similitud_del_coseno[idx]))
+
+        puntajes_similares = sorted(puntajes_similares, key = lambda x: x[1], reverse=True)
+        
+        puntajes_similares = puntajes_similares[1:6]
+        
+        juegos_indices = [int(i[0]) for i in puntajes_similares]
+
+        titulo = df_items[df_items["item_id"] == item_id]["title"].values
+
+        #vector = [{f"Recomendación {i+1}": {"Identificador": df_items["item_id"].iloc[juegos_indices[i]], "Título": df_items["title"].iloc[juegos_indices[i]]}} for i in range(len(juegos_indices))]
+        retorno = {f"Recomendación de 5 juegos relacionados con ({item_id}) {titulo}": [{f"Recomendación {i+1}": {"Identificador": df_items["item_id"].iloc[juegos_indices[i]], "Título": df_items["title"].iloc[juegos_indices[i]]}} for i in range(len(juegos_indices))]}
     return retorno
