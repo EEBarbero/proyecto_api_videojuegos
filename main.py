@@ -138,11 +138,11 @@ def sentiment_analysis(anio: int):
 
 @app.get("/recomendacion_juegos/{item_id}")
 def obtener_recomendaciones(item_id: int):
-
-    idx = indice[indice["item_id"] == item_id]["0"].values[0]
-    if idx.empty:
-        retorno = {"Error":f"No se dispone de datos para el Año {anio}."}
+    if indice[indice["item_id"] == item_id].empty:
+        retorno = {"Error":f"No se dispone de datos para el juego con identificador '{item_id}'."}
     else:
+        idx = indice[indice["item_id"] == item_id]["0"].values[0]
+
         puntajes_similares = list(enumerate(similitud_del_coseno[idx]))
 
         puntajes_similares = sorted(puntajes_similares, key = lambda x: x[1], reverse=True)
@@ -152,7 +152,8 @@ def obtener_recomendaciones(item_id: int):
         juegos_indices = [int(i[0]) for i in puntajes_similares]
 
         titulo = df_items[df_items["item_id"] == item_id]["title"].values
+        retorno = {f"Recomendación de 5 juegos relacionados con ({item_id}) {titulo}":[df_BD["title"].iloc[juegos_indices[i]] for i in range(len(juegos_indices))]}
+        
 
-        #vector = [{f"Recomendación {i+1}": {"Identificador": df_items["item_id"].iloc[juegos_indices[i]], "Título": df_items["title"].iloc[juegos_indices[i]]}} for i in range(len(juegos_indices))]
-        retorno = {f"Recomendación de 5 juegos relacionados con ({item_id}) {titulo}": [{f"Recomendación {i+1}": {"Identificador": df_items["item_id"].iloc[juegos_indices[i]], "Título": df_items["title"].iloc[juegos_indices[i]]}} for i in range(len(juegos_indices))]}
+
     return retorno
